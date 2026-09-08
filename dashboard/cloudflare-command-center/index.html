@@ -9,11 +9,18 @@
 <h1>🛡️ AI Security Command Center</h1>
 <div class="card">Agent Status: <span id="status">🟢 Online</span></div>
 <div class="grid">
-<div class="card"><h3>Security Score</h3><p>--</p></div>
-<div class="card"><h3>Critical Issues</h3><p>0</p></div>
-<div class="card"><h3>Last Scan</h3><p>Not Started</p></div>
+<div class="card"><h3>Security Score</h3><p id="security-score">--</p></div>
+<div class="card"><h3>Critical Issues</h3><p id="critical-issues">0</p></div>
+<div class="card"><h3>Last Scan</h3><p id="last-scan">Not Started</p></div>
 </div>
-<button>Start Security Scan</button>
+<button id="scan-button">Start Security Scan</button>
+<p id="scan-status"></p>
+<div class="card">
+<h3>Live Logs</h3>
+<pre id="live-logs">Waiting for logs...</pre>
 </div>
+</div>
+<script src="app.js"></script>
+<script src="live_logs.js"></script>
 </body>
 </html>
