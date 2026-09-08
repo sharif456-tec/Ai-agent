@@ -1,0 +1,22 @@
+{
+  "request_details": {
+    "target_website": "example.com",
+    "server_ip": "104.26.11.233",
+    "ports_to_check": [
+      80,
+      443,
+      22
+    ],
+    "check_type": "Port Status & Server Headers"
+  },
+  "expected_agent_output": {
+    "website_status": "Online",
+    "server_type": "Cloudflare / Nginx",
+    "port_results": {
+      "port_80": "Open",
+      "port_443": "Open",
+      "port_22": "Closed/Filtered"
+    },
+    "response_time_ms": 45
+  }
+}
