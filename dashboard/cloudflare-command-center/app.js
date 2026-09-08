@@ -1,43 +1,12 @@
 const API_BASE = window.SECURITY_API_BASE || '/api';
-
-function setText(id, value) { const el = document.getElementById(id); if (el) el.textContent = value; }
-
-async function readJson(response) {
-  const text = await response.text();
-  if (!text.trim()) throw new Error(`Empty API response (HTTP ${response.status})`);
-  let data;
-  try { data = JSON.parse(text); } catch { throw new Error(`Invalid API response (HTTP ${response.status})`); }
-  if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
-  return data;
-}
-
-async function checkAgent() {
-  try { await readJson(await fetch(`${API_BASE}/health`, { cache: 'no-store' })); setText('status', '🟢 Agent Online'); }
-  catch { setText('status', '🔴 Agent Offline'); }
-}
-
-function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
-function renderFindings(findings = []) {
-  const box = document.getElementById('findings'); if (!box) return;
-  box.innerHTML = findings.length ? findings.map(f => `<div class="finding"><span class="sev ${escapeHtml(f.severity)}">${escapeHtml(f.severity).toUpperCase()}</span><span>${escapeHtml(f.title)}</span></div>`).join('') : '<div class="ok">✓ No findings detected by the passive checks.</div>';
-}
-function renderScan(data) {
-  setText('security-score', `${data.security_score}/100`); setText('critical-issues', data.critical ?? 0); setText('high-issues', data.high ?? 0); setText('medium-issues', data.medium ?? 0); setText('low-issues', data.low ?? 0);
-  setText('last-scan', data.scanned_at || new Date().toISOString());
-  const tech = document.getElementById('technologies'); if (tech) tech.innerHTML = (data.technologies?.length ? data.technologies : ['No server technology disclosed']).map(escapeHtml).join('<br>');
-  setText('details', JSON.stringify({target:data.target, final_url:data.final_url, status:data.http_status, mode:data.mode}, null, 2)); renderFindings(data.findings);
-}
-async function startScan() {
-  const target = document.getElementById('target')?.value.trim(); if (!target) { setText('scan-status','Enter a website URL first.'); return; }
-  const button = document.getElementById('scan-button'); if (button) button.disabled = true; setText('scan-status','🔎 Running passive security checks...');
-  try { const data = await readJson(await fetch(`${API_BASE}/scan`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({target}) })); renderScan(data); setText('scan-status','✅ Scan completed.'); await loadLogs(); }
-  catch (error) { setText('scan-status', `❌ ${error.message}`); }
-  finally { if (button) button.disabled = false; }
-}
-async function loadLogs() {
-  const panel = document.getElementById('live-logs'); if (!panel) return;
-  try { const data = await readJson(await fetch(`${API_BASE}/logs`, { cache:'no-store' })); panel.textContent = (data.logs || []).map(x => `[${x.time}] ${x.message}${x.target ? ` — ${x.target}` : ''}`).join('\n') || 'No logs yet.'; }
-  catch { panel.textContent = 'Log service unavailable.'; }
-}
-document.addEventListener('DOMContentLoaded', () => { document.getElementById('scan-button')?.addEventListener('click', startScan); checkAgent(); loadLogs(); });
-setInterval(loadLogs, 5000); setInterval(checkAgent, 15000);
+function setText(id,value){const el=document.getElementById(id);if(el)el.textContent=value}
+async function readJson(response){const text=await response.text();if(!text.trim())throw new Error(`Empty API response (HTTP ${response.status})`);let data;try{data=JSON.parse(text)}catch{throw new Error(`Invalid API response (HTTP ${response.status})`)}if(!response.ok)throw new Error(data.detail||`HTTP ${response.status}`);return data}
+async function checkAgent(){try{await readJson(await fetch(`${API_BASE}/health`,{cache:'no-store'}));setText('status','🟢 Agent Online')}catch{setText('status','🔴 Agent Offline')}}
+function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function renderFindings(findings=[]){const box=document.getElementById('findings');if(!box)return;if(!findings.length){box.innerHTML='<div class="ok">✓ No findings detected.</div>';return}box.innerHTML=findings.map((f,i)=>`<details class="finding-detail"><summary><span class="sev ${escapeHtml(f.severity)}">${escapeHtml(f.severity).toUpperCase()}</span> ${escapeHtml(f.title)}</summary><div class="finding-body"><p><b>Evidence:</b> ${escapeHtml(f.evidence||'Not provided')}</p><p><b>Why it matters:</b> ${escapeHtml(f.why||'Passive check identified a configuration issue.')}</p><p><b>Recommended fix:</b> ${escapeHtml(f.recommendation||'Review and harden this configuration.')}</p></div></details>`).join('')}
+function renderChecks(data){const box=document.getElementById('check-results');if(!box)return;const passed=data.passed_checks||[];const failed=data.failed_checks||[];box.innerHTML=`<div class="check-group"><h3>✅ Passed (${passed.length})</h3>${passed.map(x=>`<div class="check pass"><b>${escapeHtml(x.check)}</b><span>${escapeHtml(x.evidence||'Present')}</span></div>`).join('')||'<div class="muted">No passed checks reported.</div>'}</div><div class="check-group"><h3>⚠️ Failed (${failed.length})</h3>${failed.map(x=>`<details class="check fail"><summary><b>${escapeHtml(x.check)}</b> — ${escapeHtml(x.severity||'info').toUpperCase()}</summary><p><b>Evidence:</b> ${escapeHtml(x.evidence||'')}</p><p><b>Why:</b> ${escapeHtml(x.why||'')}</p><p><b>Fix:</b> ${escapeHtml(x.recommendation||'')}</p></details>`).join('')||'<div class="ok">No failed checks.</div>'}</div>`}
+function renderHeaders(headers={}){const box=document.getElementById('security-headers');if(!box)return;const entries=Object.entries(headers);box.innerHTML=entries.length?entries.map(([k,v])=>`<div class="header-row"><b>${escapeHtml(k)}</b><code>${escapeHtml(v)}</code></div>`).join(''):'<div class="muted">No response headers received.</div>'}
+function renderScan(data){setText('security-score',`${data.security_score}/100`);setText('critical-issues',data.critical??0);setText('high-issues',data.high??0);setText('medium-issues',data.medium??0);setText('low-issues',data.low??0);setText('last-scan',data.scanned_at||'');const tech=document.getElementById('technologies');if(tech)tech.innerHTML=(data.technologies?.length?data.technologies:['No server technology disclosed']).map(escapeHtml).join('<br>');setText('details',JSON.stringify({target:data.target,final_url:data.final_url,status:data.http_status,status_text:data.response_summary?.status_text,content_type:data.response_summary?.content_type,content_length:data.response_summary?.content_length,redirect:data.response_summary?.redirect,duration_ms:data.scan_duration_ms,mode:data.mode},null,2));renderFindings(data.findings);renderChecks(data);renderHeaders(data.security_headers)}
+async function startScan(){const target=document.getElementById('target')?.value.trim();if(!target){setText('scan-status','Enter a website URL first.');return}const button=document.getElementById('scan-button');if(button)button.disabled=true;setText('scan-status','🔎 Running detailed passive security checks...');try{const data=await readJson(await fetch(`${API_BASE}/scan`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target})}));renderScan(data);setText('scan-status','✅ Detailed scan completed.');await loadLogs()}catch(error){setText('scan-status',`❌ ${error.message}`)}finally{if(button)button.disabled=false}}
+async function loadLogs(){const panel=document.getElementById('live-logs');if(!panel)return;try{const data=await readJson(await fetch(`${API_BASE}/logs`,{cache:'no-store'}));panel.textContent=(data.logs||[]).map(x=>`[${x.time}] ${x.message}${x.target?` — ${x.target}`:''}`).join('\n')||'No logs yet.'}catch{panel.textContent='Log service unavailable.'}}
+document.addEventListener('DOMContentLoaded',()=>{document.getElementById('scan-button')?.addEventListener('click',startScan);checkAgent();loadLogs()});setInterval(loadLogs,5000);setInterval(checkAgent,15000);
