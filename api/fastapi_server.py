@@ -36,6 +36,13 @@ def add_log(message, target=None):
 
 def public_host(hostname: str) -> bool:
     try:
+        if not hostname or hostname.lower() in {"localhost", "localhost.localdomain"}:
+            return False
+        try:
+            ip = ipaddress.ip_address(hostname)
+            return ip.is_global
+        except ValueError:
+            pass
         addresses = {x[4][0] for x in socket.getaddrinfo(hostname, None, type=socket.SOCK_STREAM)}
         return bool(addresses) and all(ipaddress.ip_address(a).is_global for a in addresses)
     except Exception:
@@ -43,8 +50,8 @@ def public_host(hostname: str) -> bool:
 
 def passive_scan(target: str):
     parsed = urlparse(target)
-    if parsed.scheme not in {"http", "https"} or not parsed.hostname or not public_host(parsed.hostname):
-        raise ValueError("Only public http/https websites are allowed")
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise ValueError("Only http/https website URLs are allowed")
     request = Request(target, headers={"User-Agent": "AI-Security-Auditor/1.0"}, method="GET")
     try:
         with urlopen(request, timeout=8) as response:
