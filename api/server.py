@@ -8,3 +8,11 @@ def health_check():
         "agent": "online",
         "time": datetime.utcnow().isoformat()
     }
+
+
+def start_scan():
+    return {
+        "status": "queued",
+        "message": "Security scan task queued",
+        "time": datetime.utcnow().isoformat()
+    }
