@@ -1,0 +1,25 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: white;
+    margin: 0;
+}
+.container {
+    padding: 30px;
+}
+.card {
+    background: #1f2937;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 12px;
+}
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap: 15px;
+}
+button {
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
