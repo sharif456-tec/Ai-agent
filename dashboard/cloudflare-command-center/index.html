@@ -1,26 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI Security Command Center</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
-<h1>🛡️ AI Security Command Center</h1>
-<div class="card">Agent Status: <span id="status">🟢 Online</span></div>
-<div class="grid">
-<div class="card"><h3>Security Score</h3><p id="security-score">--</p></div>
-<div class="card"><h3>Critical Issues</h3><p id="critical-issues">0</p></div>
-<div class="card"><h3>Last Scan</h3><p id="last-scan">Not Started</p></div>
-</div>
-<button id="scan-button">Start Security Scan</button>
-<p id="scan-status"></p>
-<div class="card">
-<h3>Live Logs</h3>
-<pre id="live-logs">Waiting for logs...</pre>
-</div>
+  <header>
+    <div><h1>🛡️ AI Security Command Center</h1><p class="muted">Passive website security auditor</p></div>
+    <span id="status" class="pill">🟢 Agent Online</span>
+  </header>
+
+  <section class="card target-card">
+    <label for="target">Website to audit</label>
+    <div class="scan-row">
+      <input id="target" type="url" placeholder="https://example.com" autocomplete="url">
+      <button id="scan-button">Start Security Scan</button>
+    </div>
+    <p class="muted">Use only on sites you own or are authorized to test.</p>
+    <p id="scan-status"></p>
+  </section>
+
+  <section class="grid">
+    <div class="card metric"><span>Security Score</span><strong id="security-score">--</strong></div>
+    <div class="card metric"><span>Critical</span><strong id="critical-issues">0</strong></div>
+    <div class="card metric"><span>High</span><strong id="high-issues">0</strong></div>
+    <div class="card metric"><span>Medium</span><strong id="medium-issues">0</strong></div>
+    <div class="card metric"><span>Low</span><strong id="low-issues">0</strong></div>
+  </section>
+
+  <section class="grid two">
+    <div class="card"><h2>Findings</h2><div id="findings">No scan results yet.</div></div>
+    <div class="card"><h2>Technology / Server</h2><div id="technologies">Not detected</div><hr><h2>Scan Details</h2><pre id="details">Waiting...</pre></div>
+  </section>
+
+  <section class="card"><h2>Live Logs</h2><pre id="live-logs">Waiting for logs...</pre></section>
 </div>
 <script src="app.js"></script>
-<script src="live_logs.js"></script>
 </body>
 </html>
