@@ -67,7 +67,7 @@ def validate_url(value: str):
     return parsed
 
 def fetch_url(url: str, timeout=10, max_bytes=512_000):
-    parsed = validate_url(url)
+    validate_url(url)
     request = Request(url, headers={"User-Agent": "AI-Security-Auditor/2.0"}, method="GET")
     try:
         with urlopen(request, timeout=timeout) as response:
@@ -122,7 +122,6 @@ def scan_target(target: str):
     status, reason, final_url, final, headers, body = fetch_url(target)
     findings = []
     passed = []
-    failed = []
 
     for name, (severity, why) in SECURITY_HEADERS.items():
         value = headers.get(name.lower())
@@ -140,11 +139,11 @@ def scan_target(target: str):
     if hsts:
         match = re.search(r"max-age\s*=\s*(\d+)", hsts, re.I)
         if not match or int(match.group(1)) < 15552000:
-            findings.append(finding("low", "HSTS max-age may be short", hsts[:500], "strict-transport-security", "A short HSTS lifetime gives weaker long-term browser enforcement.", "Use an appropriately long max-age after validating the deployment."))
+            findings.append(finding("low", "HSTS max-age may be short", "strict-transport-security", hsts[:500], "A short HSTS lifetime gives weaker long-term browser enforcement.", "Use an appropriately long max-age after validating the deployment."))
 
     csp = headers.get("content-security-policy", "")
     if csp and re.search(r"(^|;)\s*(default-src|script-src)\s+[^;]*\*", csp, re.I):
-        findings.append(finding("medium", "CSP contains a wildcard source", csp[:500], "csp", "Broad wildcard sources reduce the protection provided by CSP.", "Replace unnecessary wildcard sources with explicit trusted origins."))
+        findings.append(finding("medium", "CSP contains a wildcard source", "csp", csp[:500], "Broad wildcard sources reduce the protection provided by CSP.", "Replace unnecessary wildcard sources with explicit trusted origins."))
 
     cors = headers.get("access-control-allow-origin")
     if cors == "*":
