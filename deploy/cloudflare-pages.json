@@ -1,0 +1,5 @@
+{
+  "project": "cloudflare-command-center",
+  "framework": "static",
+  "build": "dashboard/cloudflare-command-center"
+}
