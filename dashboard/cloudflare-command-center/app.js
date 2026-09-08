@@ -1,9 +1,9 @@
-const API_URL = '/api/health';
+const API_BASE = '/api';
 
 async function checkAgent() {
   const status = document.getElementById('agent-status');
   try {
-    const response = await fetch(API_URL);
+    const response = await fetch(`${API_BASE}/health`);
     const data = await response.json();
     status.textContent = `Agent: ${data.agent}`;
   } catch (error) {
@@ -11,8 +11,16 @@ async function checkAgent() {
   }
 }
 
-function startScan() {
-  alert('Security scan request queued');
+async function startScan() {
+  const status = document.getElementById('scan-status');
+  try {
+    status.textContent = 'Scan started...';
+    const response = await fetch(`${API_BASE}/scan`, { method: 'POST' });
+    const data = await response.json();
+    status.textContent = data.message || 'Scan queued';
+  } catch (error) {
+    status.textContent = 'Scan request failed';
+  }
 }
 
 window.onload = checkAgent;
