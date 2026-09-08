@@ -3,9 +3,14 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 import socket
 import ssl
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, HttpUrl
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DASHBOARD_DIR = BASE_DIR / "dashboard" / "cloudflare-command-center"
 
 app = FastAPI(title="AI Security Command Center")
 
@@ -118,3 +123,8 @@ def ssl_check(host: str):
                 return {"host": host, "tls": ssock.version(), "cipher": ssock.cipher()[0], "subject": cert.get("subject")}
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+
+# Serve the dashboard from the same FastAPI process so /api and the UI share one origin.
+# This removes the separate-static-host/CORS problem during deployment.
+if DASHBOARD_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
