@@ -1,0 +1,1 @@
+Live dashboard is served by the FastAPI application at /.
